@@ -1,0 +1,59 @@
+Requirements:
+Ultimaker with a working NFC setup. E.g. i2c-dev module loaded by default.
+One tag in sight which will be used during the test.
+
+To install
+
+Copy files to target
+
+	scp * root@<target ip>:
+
+Then run the install script on the target:
+with sshpass:
+	sshpass -p ultimaker ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@<target ip> ./install_nfc.sh
+or without sshpass
+	ssh root@<target ip> ./install_nfc.sh
+
+The install script will copy the appropriate files and scan for the visible
+tag. It will then print the UID of the tag.
+
+Then run the setup script;
+with sshpass:
+	sshpass -p ultimaker ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@<target ip> ./setup_nfc.sh <UID of tag>
+or without sshpass
+	ssh root@<target ip> ./setup_nfc.sh <UID of tag>
+
+The printer will then start (and continue even after a reboot) to always look
+for the tag set by setup.
+
+Additionally, a log file is kept (in CSV format) in /root/nfc_loop.csv.
+
+Under the hood, the following happens.
+
+Install reads the tag to /tmp/dump.mfd
+Setup copies /tmp/dump.mfd to /root/<uid>.ultitag and modifies setup_nfc.sh to
+always look for this specific tag UID.
+
+The loop will then constantly read all available tags and sees if it has found
+the specific tag.
+
+If no matching tag is found, this could be either due to hardware failure,
+the tag was simply out of range (not visible), or has a different UID,
+	the cabin lights then turn orange.
+
+If a tag with the correct UID is found, but when comparing the previous data
+and the currently read data does not match, which could happen due to noise in
+the data transfer for example,
+	the cabin lights then turn red.
+
+If a tag with the correct UID is found and comparing the previous data and the
+currently read data do match,
+	the cabin lights then turn green.
+
+Between each read operation is a 'pause' where the system is not doing
+anything. During this time,
+	the cabin lights then turn blue, followed by white to indicate the
+test is starting.
+
+When the script has started but exited its endless loop for whatever reason,
+	the cabin lights then turn off.

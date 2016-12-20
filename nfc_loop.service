@@ -1,0 +1,10 @@
+[Unit]
+Description=Script to loop NFC forever
+
+[Service]
+Type=simple
+ExecStart=/root/nfc_loop.sh
+Restart=always
+
+[Install]
+WantedBy=griffin.target
