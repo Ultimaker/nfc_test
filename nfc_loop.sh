@@ -4,24 +4,30 @@ ULTITAG="<fill in tag number here>"
 SAVEFILE="/root/nfc_loop.csv"
 DUMPFILE="/tmp/dump.mfd"
 
+LED="/sys/class/leds/opinicus:orange:d1"
+echo "0" | tee "/sys/class/leds/opinicus:orange:d2/brightness"
+
 while true; do
-	echo "M142 r0 g0 b255 w0" > /dev/ttyS1
-	sleep 10
-	echo "M142 r0 g0 b0 w255" > /dev/ttyS1
+	echo "none" | tee ${LED}/trigger
 	sleep 1
+	echo "timer" | tee ${LED}/trigger
+	echo "50" | tee ${LED}/delay_o*
 	rm ${DUMPFILE}
 	/root/nfc-mfultralight r ${DUMPFILE} --with-uid ${ULTITAG}
 	cmp /root/${ULTITAG}.ultitag ${DUMPFILE}
 	result=$?
  	if [ ${result} -eq 0 ]; then
-		echo "M142 r0 g255 b0 w0" > /dev/ttyS1
+		echo "default-on" | tee ${LED}/trigger
 	elif [ ${result} -eq 2 ]; then
-		echo "M142 r255 g0 b0 w0" > /dev/ttyS1
+		echo "timer" | tee ${LED}/trigger
+		echo "100" | tee ${LED}/delay_off
+		echo "1000" | tee ${LED}/delay_on
 	else
-		echo "M142 r255 g64 b0 w0" > /dev/ttyS1
+		echo "timer" | tee ${LED}/trigger
+		echo "500" | tee ${LED}/delay_o*
 	fi
 	echo "`date`, ${result}" >> ${SAVEFILE}
 	sleep 3
 done
-echo "M142 r0 g0 b0 w0" > /dev/ttyS1
+echo "none" | tee ${LED}/trigger
 sleep 2

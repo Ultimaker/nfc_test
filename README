@@ -37,23 +37,21 @@ always look for this specific tag UID.
 The loop will then constantly read all available tags and sees if it has found
 the specific tag.
 
+During the scanning of a tag,
+	the LED then blinks rapidly.
+
 If no matching tag is found, this could be either due to hardware failure,
 the tag was simply out of range (not visible), or has a different UID,
-	the cabin lights then turn orange.
+	the LED then blinks slowly.
 
 If a tag with the correct UID is found, but when comparing the previous data
 and the currently read data does not match, which could happen due to noise in
 the data transfer for example,
-	the cabin lights then turn red.
+	the LED then blinks irregularly, on longer then off.
 
 If a tag with the correct UID is found and comparing the previous data and the
 currently read data do match,
-	the cabin lights then turn green.
-
-Between each read operation is a 'pause' where the system is not doing
-anything. During this time,
-	the cabin lights then turn blue, followed by white to indicate the
-test is starting.
+	the LED then turns on.
 
 When the script has started but exited its endless loop for whatever reason,
-	the cabin lights then turn off.
+	the LED turns off and stays off.
